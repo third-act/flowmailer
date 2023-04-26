@@ -18,7 +18,9 @@ async fn main() {
         "[FLOW SELECTOR]",
     )
     // Set variables within the template.
-    .set_data(serde_json::json!({}))
+    .set_data(serde_json::json!({
+        "code": "123456"
+    }))
     .expect("set data")
     // Set the subject of the mail.
     .set_subject("test_flowmailer_template_mail");
