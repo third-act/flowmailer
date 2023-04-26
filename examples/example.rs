@@ -9,8 +9,7 @@ async fn main() {
         auth::ClientSecret::new(CLIENT_SECRET.to_string()),
         auth::ClientId::new(CLIENT_ID.to_string()),
         auth::AccountId::new(ACCOUNT_ID.to_string()),
-    )
-    .unwrap();
+    );
     let flowmailer = Client::new(auth);
     let mailbuilder = MailBuilder::new_template(
         MailAddress::new("sender.mail"),

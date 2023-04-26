@@ -70,17 +70,13 @@ pub struct Auth {
 }
 
 impl Auth {
-    pub fn new(
-        client_secret: ClientSecret,
-        client_id: ClientId,
-        account_id: AccountId,
-    ) -> Result<Self> {
+    pub fn new(client_secret: ClientSecret, client_id: ClientId, account_id: AccountId) -> Self {
         let auth = Self {
             client_secret,
             client_id,
             account_id,
         };
-        Ok(auth)
+        auth
     }
 
     pub(crate) async fn authenticate(&self, reqw_client: &reqwest::Client) -> Result<AccessToken> {
