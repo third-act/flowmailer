@@ -1,3 +1,4 @@
+use base64::{engine::general_purpose::STANDARD, Engine};
 use serde::{Deserialize, Serialize};
 
 pub type Int = u64;
@@ -8,12 +9,30 @@ pub type Bool = bool;
 
 pub type String = std::string::String;
 
-#[derive(Serialize, Deserialize)]
+/// Base64-encoded content wrapper.
+#[derive(Clone, Serialize, Deserialize)]
 pub struct Base64(String);
 
 impl Base64 {
-    pub fn new(number: impl Into<String>) -> Self {
-        Self(number.into())
+    /// Creates a new Base64 from an already-encoded string.
+    pub fn new(encoded: impl Into<String>) -> Self {
+        Self(encoded.into())
+    }
+
+    /// Creates a Base64 by encoding the given bytes.
+    pub fn from_bytes(bytes: &[u8]) -> Self {
+        Self(STANDARD.encode(bytes))
+    }
+
+    /// Returns the base64-encoded string.
+    pub fn as_str(&self) -> &str {
+        &self.0
+    }
+
+    /// Decodes the base64 content back to bytes.
+    /// Returns None if the content is not valid base64.
+    pub fn decode(&self) -> Option<Vec<u8>> {
+        STANDARD.decode(&self.0).ok()
     }
 }
 

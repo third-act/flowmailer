@@ -17,4 +17,5 @@ pub use auth::Auth;
 pub use client::Client;
 pub use error::Result;
 pub use mail::{MailAddress, MailBuilder};
+pub use resources::{Attachment, AttachmentBuilder};
 pub use template::Template;

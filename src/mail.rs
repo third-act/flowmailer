@@ -14,6 +14,7 @@ pub struct MailBuilder {
     html: Option<String>,
     flow_selector: Option<String>,
     mail_data: Option<serde_json::Value>,
+    attachments: Vec<Attachment>,
 }
 
 impl MailAddress {
@@ -32,6 +33,7 @@ impl MailBuilder {
             html: None,
             flow_selector: None,
             mail_data: None,
+            attachments: Vec::new(),
         }
     }
 
@@ -67,7 +69,43 @@ impl MailBuilder {
         self
     }
 
+    /// Adds an attachment to the email.
+    ///
+    /// # Example
+    /// ```
+    /// use flowmailer::{MailBuilder, MailAddress, Attachment};
+    ///
+    /// let mail = MailBuilder::new_text(
+    ///     MailAddress::new("sender@example.com"),
+    ///     MailAddress::new("recipient@example.com"),
+    ///     "Hello!"
+    /// )
+    /// .add_attachment(
+    ///     Attachment::builder()
+    ///         .filename("report.pdf")
+    ///         .content_type("application/pdf")
+    ///         .content_bytes(&[/* pdf bytes */])
+    ///         .build()
+    /// );
+    /// ```
+    pub fn add_attachment(mut self, attachment: Attachment) -> Self {
+        self.attachments.push(attachment);
+        self
+    }
+
+    /// Adds multiple attachments to the email.
+    pub fn add_attachments(mut self, attachments: impl IntoIterator<Item = Attachment>) -> Self {
+        self.attachments.extend(attachments);
+        self
+    }
+
     pub async fn send(self, client: &Client) -> Result<()> {
+        let attachments = if self.attachments.is_empty() {
+            None
+        } else {
+            Some(self.attachments.into_boxed_slice())
+        };
+
         let response = rest_api::message::submit(
             client,
             SubmitMessage {
@@ -81,7 +119,7 @@ impl MailBuilder {
                 sender_address: self.sender.0,
                 subject: self.subject,
                 text: self.text,
-                attachments: None,
+                attachments,
                 delivery_notification_type: None,
                 flow_selector: self.flow_selector,
                 header_to_address: None,

@@ -22,7 +22,7 @@ impl Response {
 }
 
 impl<'a> RequestBuilder<'a> {
-    const BASE_URL: &str = "https://api.flowmailer.net";
+    const BASE_URL: &'static str = "https://api.flowmailer.net";
 
     pub fn post(client: &'a Client, path: &str, matrix_args: &[(&str, &str)]) -> Result<Self> {
         let url = Self::create_url(client, &path, matrix_args)?;

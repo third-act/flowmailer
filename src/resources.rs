@@ -11,7 +11,9 @@ pub struct Address {
     pub name: ty::String,
 }
 
-#[derive(Serialize, Deserialize)]
+/// Email attachment.
+#[derive(Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct Attachment {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub content: Option<ty::Base64>,
@@ -28,6 +30,101 @@ pub struct Attachment {
     pub disposition: ty::String,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub filename: Option<ty::String>,
+}
+
+impl Attachment {
+    /// Creates a new AttachmentBuilder.
+    pub fn builder() -> AttachmentBuilder {
+        AttachmentBuilder::new()
+    }
+}
+
+/// Builder for creating email attachments.
+#[derive(Default)]
+pub struct AttachmentBuilder {
+    content: Option<ty::Base64>,
+    content_id: Option<ty::String>,
+    content_type: Option<ty::String>,
+    disposition: Option<ty::String>,
+    filename: Option<ty::String>,
+}
+
+impl AttachmentBuilder {
+    /// Creates a new AttachmentBuilder with default values.
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    /// Sets the attachment content from raw bytes.
+    /// The bytes will be base64-encoded automatically.
+    pub fn content_bytes(mut self, bytes: &[u8]) -> Self {
+        self.content = Some(ty::Base64::from_bytes(bytes));
+        self
+    }
+
+    /// Sets the attachment content from an already base64-encoded string.
+    pub fn content_base64(mut self, base64_str: impl Into<String>) -> Self {
+        self.content = Some(ty::Base64::new(base64_str));
+        self
+    }
+
+    /// Sets the Content-ID header.
+    /// Required for disposition "related" (inline images referenced in HTML).
+    /// Example: "<part1.DE1D8F7E.E51807FF@flowmailer.com>"
+    pub fn content_id(mut self, id: impl Into<String>) -> Self {
+        self.content_id = Some(id.into());
+        self
+    }
+
+    /// Sets the content type (MIME type) of the attachment.
+    /// Examples: "application/pdf", "image/jpeg", "text/plain"
+    pub fn content_type(mut self, mime_type: impl Into<String>) -> Self {
+        self.content_type = Some(mime_type.into());
+        self
+    }
+
+    /// Sets the Content-Disposition to "attachment" (default for regular file attachments).
+    pub fn disposition_attachment(mut self) -> Self {
+        self.disposition = Some("attachment".to_string());
+        self
+    }
+
+    /// Sets the Content-Disposition to "inline" (for content displayed inline).
+    pub fn disposition_inline(mut self) -> Self {
+        self.disposition = Some("inline".to_string());
+        self
+    }
+
+    /// Sets the Content-Disposition to "related" (for images referenced in HTML).
+    /// Note: When using "related", you should also set a content_id.
+    pub fn disposition_related(mut self) -> Self {
+        self.disposition = Some("related".to_string());
+        self
+    }
+
+    /// Sets a custom disposition value.
+    pub fn disposition(mut self, disposition: impl Into<String>) -> Self {
+        self.disposition = Some(disposition.into());
+        self
+    }
+
+    /// Sets the filename for the attachment.
+    pub fn filename(mut self, name: impl Into<String>) -> Self {
+        self.filename = Some(name.into());
+        self
+    }
+
+    /// Builds the Attachment.
+    /// Defaults to disposition "attachment" if not specified.
+    pub fn build(self) -> Attachment {
+        Attachment {
+            content: self.content,
+            content_id: self.content_id,
+            content_type: self.content_type,
+            disposition: self.disposition.unwrap_or_else(|| "attachment".to_string()),
+            filename: self.filename,
+        }
+    }
 }
 
 /// Undeliverable message.

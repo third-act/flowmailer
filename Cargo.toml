@@ -1,6 +1,6 @@
 [package]
 name = "flowmailer"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2021"
 license = "MIT"
 description = "A library for integrating with flowmailer for sending email."
@@ -11,3 +11,4 @@ serde_json = "1.0.94"
 serde = { version = "1.0.152", features = [ "derive" ] }
 reqwest = { version = "0.11.14", features = [ "json", "blocking" ] }
 tokio = { version = "1.25.0", features = ["full"] }
+base64 = "0.21"
